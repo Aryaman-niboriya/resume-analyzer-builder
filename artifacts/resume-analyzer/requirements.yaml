@@ -1,0 +1,15 @@
+packages:
+  "framer-motion": "For smooth micro-interactions, page transitions, and animated complex UI states"
+  "recharts": "For the skills match and keyword coverage charts in the dashboard"
+  "clsx": "Utility for constructing className strings conditionally"
+  "tailwind-merge": "Utility for merging tailwind classes safely"
+
+images:
+  - path: "artifacts/resume-analyzer/public/images/hero-abstract.png"
+    description: "Dark, moody abstract background with glowing ethereal waves of indigo, violet, and deep blue. Subtle glassmorphism light leaks, highly polished 3D render style, 8k resolution, suitable for a premium tech SaaS landing page background."
+    aspect_ratio: "16:9"
+
+notes:
+  - App relies purely on mock data for demonstration purposes as requested.
+  - Using framer-motion for all complex layout animations and page transitions.
+  - Relying on Recharts for data visualization in the dashboard.
