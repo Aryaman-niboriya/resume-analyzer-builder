@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { apiUrl } from "@/lib/api";
+import { apiFetch, apiUrl } from "@/lib/api";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -46,7 +46,7 @@ export default function HrMode() {
     setLoading(true);
     try {
       const token = localStorage.getItem("auth_token");
-      const res = await fetch(apiUrl("/api/hr_mode/analyze_batch"), {
+      const res = await apiFetch("/api/hr_mode/analyze_batch", {
         method: "POST",
         headers: { Authorization: `Bearer ${token}` },
         body: formData,

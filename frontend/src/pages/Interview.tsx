@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Copy, CheckCircle2, Sparkles, ChevronDown, Target, Loader2, UploadCloud, PlusCircle, History, CalendarDays, FileText, RefreshCw, Pencil, Trash2, Save, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { getToken, getUser } from "@/lib/auth";
-import { apiUrl } from "@/lib/api";
+import { apiFetch, apiUrl } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
 
 type InterviewQuestion = {
@@ -220,7 +220,7 @@ export default function Interview() {
     setHistoryLoading(true);
     try {
       const token = getToken();
-      const res = await fetch(apiUrl(`/api/interview/history?user_id=${user.id}`), {
+      const res = await apiFetch(`/api/interview/history?user_id=${user.id}`, {
         headers: token ? { "Authorization": `Bearer ${token}` } : {}
       });
 
@@ -253,7 +253,7 @@ export default function Interview() {
         const savedHistory = await fetchHistory(true);
         if (savedHistory.length > 0) return;
 
-        const res = await fetch(apiUrl(`/api/dashboard/latest-analysis?user_id=${user.id}`), {
+        const res = await apiFetch(`/api/dashboard/latest-analysis?user_id=${user.id}`, {
           headers: { "Authorization": `Bearer ${token}` }
         });
         if (res.ok) {
@@ -317,7 +317,7 @@ export default function Interview() {
     setSavingHistoryId(item.id);
     try {
       const token = getToken();
-      const res = await fetch(apiUrl(`/api/interview/history/${item.id}`), {
+      const res = await apiFetch(`/api/interview/history/${item.id}`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
@@ -348,7 +348,7 @@ export default function Interview() {
     setDeletingHistoryId(item.id);
     try {
       const token = getToken();
-      const res = await fetch(apiUrl(`/api/interview/history/${item.id}?user_id=${user?.id}`), {
+      const res = await apiFetch(`/api/interview/history/${item.id}?user_id=${user?.id}`, {
         method: "DELETE",
         headers: token ? { "Authorization": `Bearer ${token}` } : {},
       });
@@ -379,7 +379,7 @@ export default function Interview() {
       formData.append('job_description', jobDesc || 'Software Engineer');
       if (user) formData.append('user_id', user.id);
 
-      const res = await fetch(apiUrl(`/api/interview/upload-and-generate`), {
+      const res = await apiFetch(`/api/interview/upload-and-generate`, {
         method: "POST",
         headers: token ? { "Authorization": `Bearer ${token}` } : {},
         body: formData
@@ -404,7 +404,7 @@ export default function Interview() {
     setGeneratingType(type);
     try {
       const token = getToken();
-      const res = await fetch(apiUrl(`/api/interview/generate`), {
+      const res = await apiFetch(`/api/interview/generate`, {
         method: "POST",
         headers: { 
           "Authorization": `Bearer ${token}`,

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useToast } from './use-toast';
-import { apiUrl } from '@/lib/api';
+import { apiFetch, apiUrl } from '@/lib/api';
 
 export function useUpload() {
   const [isUploading, setIsUploading] = useState(false);
@@ -31,7 +31,7 @@ export function useUpload() {
       }
 
       const token = localStorage.getItem('auth_token');
-      const response = await fetch(apiUrl('/api/upload'), {
+      const response = await apiFetch('/api/upload', {
         method: 'POST',
         headers: token ? { "Authorization": `Bearer ${token}` } : {},
         body: formData,

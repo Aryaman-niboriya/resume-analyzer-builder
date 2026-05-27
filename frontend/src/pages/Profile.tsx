@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { getUser, setUser, getToken, User } from "@/lib/auth";
-import { apiUrl } from "@/lib/api";
+import { apiFetch, apiUrl } from "@/lib/api";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 
 export default function Profile() {
@@ -23,7 +23,7 @@ export default function Profile() {
         return;
       }
       try {
-        const res = await fetch(apiUrl("/api/auth/profile"), {
+        const res = await apiFetch("/api/auth/profile", {
           headers: { "Authorization": `Bearer ${token}` }
         });
         if (!res.ok) throw new Error("Failed to load profile");
@@ -45,7 +45,7 @@ export default function Profile() {
     setSaving(true);
     const token = getToken();
     try {
-      const res = await fetch(apiUrl("/api/auth/profile"), {
+      const res = await apiFetch("/api/auth/profile", {
         method: "PUT",
         headers: { 
           "Authorization": `Bearer ${token}`,

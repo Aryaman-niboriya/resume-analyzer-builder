@@ -2,7 +2,7 @@ import { useState, useRef } from "react";
 import { Link } from "wouter";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { useToast } from "@/hooks/use-toast";
-import { apiUrl } from "@/lib/api";
+import { apiFetch, apiUrl } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -39,7 +39,7 @@ export default function ResumeBuilder() {
     setLoading(true);
     try {
       const token = localStorage.getItem("auth_token");
-      const res = await fetch(apiUrl("/api/builder/extract"), {
+      const res = await apiFetch("/api/builder/extract", {
         method: "POST",
         headers: { Authorization: `Bearer ${token}` },
         body: formData,
@@ -65,7 +65,7 @@ export default function ResumeBuilder() {
     setLoading(true);
     try {
       const token = localStorage.getItem("auth_token");
-      const res = await fetch(apiUrl("/api/builder/generate"), {
+      const res = await apiFetch("/api/builder/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify({ masterProfile, jobDescription }),
@@ -86,7 +86,7 @@ export default function ResumeBuilder() {
   const generateCoverLetter = async (resumeData: any) => {
     try {
       const token = localStorage.getItem("auth_token");
-      const res = await fetch(apiUrl("/api/builder/cover-letter"), {
+      const res = await apiFetch("/api/builder/cover-letter", {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify({ tailoredResume: resumeData, jobDescription }),

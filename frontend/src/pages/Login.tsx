@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { setToken, setUser } from "@/lib/auth";
-import { apiUrl } from "@/lib/api";
+import { apiFetch, apiUrl } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
 
 export default function Login() {
@@ -28,7 +28,7 @@ export default function Login() {
     if (!credentialResponse.credential) return;
     try {
       setLoading(true);
-      const res = await fetch(apiUrl("/api/auth/google"), {
+      const res = await apiFetch("/api/auth/google", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ credential: credentialResponse.credential }),
@@ -55,7 +55,7 @@ export default function Login() {
     e.preventDefault();
     setLoading(true);
     try {
-      const res = await fetch(apiUrl("/api/auth/login"), {
+      const res = await apiFetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),

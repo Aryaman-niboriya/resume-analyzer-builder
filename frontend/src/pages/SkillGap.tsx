@@ -4,7 +4,7 @@ import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { BookOpen, AlertCircle, Target, Loader2, PlayCircle, ExternalLink, CheckCircle2 } from "lucide-react";
 import { getToken, getUser } from "@/lib/auth";
-import { apiUrl } from "@/lib/api";
+import { apiFetch, apiUrl } from "@/lib/api";
 import { Link } from "wouter";
 
 export default function SkillGap() {
@@ -22,7 +22,7 @@ export default function SkillGap() {
           return;
         }
         
-        const res = await fetch(apiUrl(`/api/dashboard/latest-analysis?user_id=${user.id}`), {
+        const res = await apiFetch(`/api/dashboard/latest-analysis?user_id=${user.id}`, {
           headers: { "Authorization": `Bearer ${token}` }
         });
         

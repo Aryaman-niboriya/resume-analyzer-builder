@@ -4,7 +4,7 @@ import { ScoreRing } from "@/components/ui/ScoreRing";
 import { Sparkles, Activity, FileText, CheckCircle2, MessageSquare } from "lucide-react";
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 import { getToken, getUser } from "@/lib/auth";
-import { apiUrl } from "@/lib/api";
+import { apiFetch, apiUrl } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
 import { Link } from "wouter";
 
@@ -20,7 +20,7 @@ export default function Dashboard() {
       try {
         const token = getToken();
         const userIdParam = user ? `?user_id=${user.id}` : '';
-        const res = await fetch(apiUrl(`/api/dashboard/stats${userIdParam}`), {
+        const res = await apiFetch(`/api/dashboard/stats${userIdParam}`, {
           headers: token ? { "Authorization": `Bearer ${token}` } : {}
         });
         
