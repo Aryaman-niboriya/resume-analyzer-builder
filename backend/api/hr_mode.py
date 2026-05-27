@@ -2,7 +2,8 @@ import os
 import io
 import json
 from flask import Blueprint, request, jsonify
-import google.generativeai as genai
+from google import genai
+from google.genai import types
 import fitz  # PyMuPDF
 from api.auth import token_required
 
@@ -30,7 +31,12 @@ def analyze_batch(current_user):
     if not uploaded_files or len(uploaded_files) == 0:
         return jsonify({"error": "No resumes uploaded"}), 400
 
-    model = genai.GenerativeModel('gemini-2.5-flash')
+    # Setup Gemini
+    GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+    if not GEMINI_API_KEY:
+        return jsonify({"error": "GenAI key missing"}), 500
+        
+    client = genai.Client(api_key=GEMINI_API_KEY)
     
     # 1. Extract text from all PDFs
     resumes_data = []
@@ -90,7 +96,14 @@ def analyze_batch(current_user):
     
     candidates = []
     try:
-        response = model.generate_content(prompt)
+        response = client.models.generate_content(
+            model='gemini-2.5-flash',
+            contents=prompt,
+            config=types.GenerateContentConfig(
+                response_mime_type="application/json",
+                temperature=0.2,
+            ),
+        )
         json_text = response.text.strip()
         
         import re

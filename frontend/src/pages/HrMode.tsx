@@ -235,7 +235,7 @@ export default function HrMode() {
                             <RadarChart cx="50%" cy="50%" outerRadius="65%" data={radarData}>
                               <PolarGrid stroke="rgba(255,255,255,0.05)" />
                               <PolarAngleAxis dataKey="subject" tick={{ fill: "rgba(255,255,255,0.4)", fontSize: 11, fontWeight: 600 }} />
-                              <PolarRadiusAxis angle={30} domain={[0, 10]} content={(props: any) => <g />} />
+                              <PolarRadiusAxis angle={30} domain={[0, 10]} tick={false} axisLine={false} />
                               <Tooltip contentStyle={{ backgroundColor: 'rgba(0,0,0,0.8)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px' }} />
                               <Radar name="Candidate" dataKey="A" stroke={isTopPick ? "#38bdf8" : "#8b5cf6"} strokeWidth={2} fill={isTopPick ? "#38bdf8" : "#8b5cf6"} fillOpacity={0.25} />
                             </RadarChart>

@@ -2,7 +2,8 @@ import os
 import io
 import json
 from flask import Blueprint, request, jsonify
-import google.generativeai as genai
+from google import genai
+from google.genai import types
 import fitz  # PyMuPDF
 from api.auth import token_required
 
@@ -11,8 +12,15 @@ builder_bp = Blueprint('builder', __name__)
 
 # Verify Gemini API key is configured
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
+MODEL_NAME = "gemini-2.5-flash"
+
+# Initialize the new GenAI client
+_client = None
 if GEMINI_API_KEY:
-    genai.configure(api_key=GEMINI_API_KEY)
+    try:
+        _client = genai.Client(api_key=GEMINI_API_KEY)
+    except Exception as e:
+        print(f"Warning: Failed to initialize GenAI client in builder: {e}")
 
 # Helper function to extract text from PDF
 def extract_text_from_pdf(file_bytes):
@@ -36,7 +44,6 @@ def extract_master_profile(current_user):
         pdf_text = extract_text_from_pdf(file.read())
         
         # Use Gemini to extract structured data
-        model = genai.GenerativeModel('gemini-2.5-flash')
         prompt = f"""
         Extract the resume information from the following text and return it as a structured JSON object. 
         Follow this exact structure:
@@ -61,7 +68,14 @@ def extract_master_profile(current_user):
         Return ONLY valid JSON and nothing else.
         """
         
-        response = model.generate_content(prompt)
+        response = _client.models.generate_content(
+            model=MODEL_NAME,
+            contents=prompt,
+            config=types.GenerateContentConfig(
+                response_mime_type="application/json",
+                temperature=0.2,
+            ),
+        )
         json_text = response.text.strip()
         if json_text.startswith("```json"):
             json_text = json_text[7:-3]
@@ -85,7 +99,6 @@ def generate_tailored_resume(current_user):
         return jsonify({"error": "Master Profile and Job Description are required"}), 400
         
     try:
-        model = genai.GenerativeModel('gemini-2.5-flash')
         prompt = f"""
         You are an expert ATS Resume Writer and Career Coach. 
         I have a Master Profile containing all my experiences, and a specific Job Description I am applying for.
@@ -106,7 +119,14 @@ def generate_tailored_resume(current_user):
         Return ONLY valid JSON and nothing else.
         """
         
-        response = model.generate_content(prompt)
+        response = _client.models.generate_content(
+            model=MODEL_NAME,
+            contents=prompt,
+            config=types.GenerateContentConfig(
+                response_mime_type="application/json",
+                temperature=0.2,
+            ),
+        )
         json_text = response.text.strip()
         if json_text.startswith("```json"):
             json_text = json_text[7:-3]
@@ -130,7 +150,6 @@ def generate_cover_letter(current_user):
         return jsonify({"error": "Tailored Resume and Job Description are required"}), 400
         
     try:
-        model = genai.GenerativeModel('gemini-2.5-flash')
         prompt = f"""
         You are an expert Career Coach.
         Write a highly compelling, professional, and concise Cover Letter using the candidate's tailored resume and the target Job Description.
@@ -149,7 +168,13 @@ def generate_cover_letter(current_user):
         
         Return pure text. Do not wrap in markdown blocks.
         """
-        response = model.generate_content(prompt)
+        response = _client.models.generate_content(
+            model=MODEL_NAME,
+            contents=prompt,
+            config=types.GenerateContentConfig(
+                temperature=0.5,
+            ),
+        )
         return jsonify({"coverLetter": response.text.strip()}), 200
         
     except Exception as e:

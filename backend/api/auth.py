@@ -17,7 +17,7 @@ GOOGLE_CLIENT_ID = os.environ.get('GOOGLE_CLIENT_ID')
 
 @auth_bp.route('/register', methods=['POST'])
 def register():
-    if db is None:
+    if not db:
          return jsonify({"error": "Database connection error"}), 500
          
     data = request.get_json()
@@ -61,7 +61,7 @@ def register():
 
 @auth_bp.route('/login', methods=['POST'])
 def login():
-    if db is None:
+    if not db:
          return jsonify({"error": "Database connection error"}), 500
 
     data = request.get_json()
@@ -160,7 +160,7 @@ def update_profile(current_user):
 
 @auth_bp.route('/google', methods=['POST'])
 def google_auth():
-    if db is None:
+    if not db:
          return jsonify({"error": "Database connection error"}), 500
 
     data = request.get_json()

@@ -52,6 +52,7 @@ Thumbs.db
 .env
 .env.local
 .env.*.local
+scripts/.env.deploy.local
 
 # Python
 __pycache__/
@@ -67,3 +68,7 @@ create_docx.py
 
 # Build
 frontend/dist/
+
+# DevContext - AI coding context
+.devctx/
+.vercel

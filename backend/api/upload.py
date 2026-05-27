@@ -57,7 +57,7 @@ def upload_resume():
         if user_id:
             try:
                 from db import db
-                if db is not None:
+                if db:
                     import datetime
                     doc = {
                         "user_id": user_id,

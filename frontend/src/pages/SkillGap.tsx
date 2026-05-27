@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
@@ -10,7 +10,8 @@ import { Link } from "wouter";
 export default function SkillGap() {
   const [report, setReport] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const user = getUser();
+  // Keep stable reference to avoid repeated fetch loops.
+  const user = useMemo(() => getUser(), []);
 
   useEffect(() => {
     const fetchLatestAnalysis = async () => {

@@ -25,7 +25,7 @@ def get_stats():
         "scoreHistory": [],
     }
 
-    if db is None:
+    if not db:
         return jsonify(stats), 200
 
     try:
@@ -93,7 +93,7 @@ def save_analysis():
     Save an analysis result to the database for history tracking.
     Called by the frontend after a successful analysis.
     """
-    if db is None:
+    if not db:
         return jsonify({"error": "Database not available"}), 500
 
     data = request.get_json()
@@ -127,7 +127,7 @@ def get_latest_analysis():
     if not user_id:
         return jsonify({"error": "user_id is required"}), 400
         
-    if db is None:
+    if not db:
         return jsonify({"error": "Database not available"}), 500
         
     try:

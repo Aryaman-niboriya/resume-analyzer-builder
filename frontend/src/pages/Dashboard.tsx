@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { ScoreRing } from "@/components/ui/ScoreRing";
 import { Sparkles, Activity, FileText, CheckCircle2, MessageSquare } from "lucide-react";
@@ -12,7 +12,8 @@ export default function Dashboard() {
   const [stats, setStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
-  const user = getUser();
+  // Important: keep user reference stable to avoid refetch loops.
+  const user = useMemo(() => getUser(), []);
 
   useEffect(() => {
     const fetchStats = async () => {

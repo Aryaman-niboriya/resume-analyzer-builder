@@ -38,7 +38,7 @@ def _serialize_history(doc):
     }
 
 def _save_history(user_id, job_description, resume_filename, resume_text, questions):
-    if not user_id or db is None:
+    if not user_id or not db:
         return None
 
     now = datetime.datetime.utcnow()
@@ -56,7 +56,7 @@ def _save_history(user_id, job_description, resume_filename, resume_text, questi
     return _serialize_history(doc)
 
 def _append_history(user_id, history_id, job_description, resume_text, questions):
-    if not user_id or db is None:
+    if not user_id or not db:
         return None
 
     interviews_col = db['interviews']
@@ -106,7 +106,7 @@ def get_history():
     if not user_id:
         return jsonify({"error": "user_id is required"}), 400
 
-    if db is None:
+    if not db:
         return jsonify([]), 200
 
     try:
@@ -126,7 +126,7 @@ def update_history(history_id):
     if not user_id:
         return jsonify({"error": "user_id is required"}), 400
 
-    if db is None:
+    if not db:
         return jsonify({"error": "Database not available"}), 500
 
     try:
@@ -176,7 +176,7 @@ def generate_questions():
     if not user_id:
         return jsonify({"error": "user_id is required"}), 400
         
-    if db is None:
+    if not db:
         return jsonify({"error": "Database not available"}), 500
         
     try:

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { Copy, CheckCircle2, Sparkles, ChevronDown, Target, Loader2, UploadCloud, PlusCircle, History, CalendarDays, FileText, RefreshCw, Pencil, Trash2, Save, X } from "lucide-react";
@@ -211,7 +211,8 @@ export default function Interview() {
   const [deletingHistoryId, setDeletingHistoryId] = useState<string | null>(null);
   
   const { toast } = useToast();
-  const user = getUser();
+  // Keep stable reference to avoid unintended refetch loops.
+  const user = useMemo(() => getUser(), []);
 
   const fetchHistory = useCallback(async (selectLatest = false) => {
     if (!user?.id) return [];

@@ -12,6 +12,13 @@ load_dotenv()
 def create_app():
     app = Flask(__name__)
     app.url_map.strict_slashes = False
+
+    # Prevent huge uploads from exhausting memory (can trigger exit code 137).
+    # Default: 10 MB. Override via env var MAX_CONTENT_LENGTH (bytes).
+    try:
+        app.config["MAX_CONTENT_LENGTH"] = int(os.environ.get("MAX_CONTENT_LENGTH", str(10 * 1024 * 1024)))
+    except Exception:
+        app.config["MAX_CONTENT_LENGTH"] = 10 * 1024 * 1024
     
     frontend_url = os.environ.get("FRONTEND_URL", "http://localhost:5173").rstrip("/")
     cors_origins = [frontend_url, "http://localhost:5173", "http://127.0.0.1:5173"]
@@ -35,7 +42,12 @@ def create_app():
     
     @app.route('/health')
     def health_check():
-        return jsonify({"status": "healthy", "service": "resume-analyzer-api"}), 200
+        # Keep this endpoint extremely fast and non-blocking.
+        # Render health checks time out quickly; avoid DB calls here.
+        return jsonify({
+            "status": "healthy",
+            "service": "resume-analyzer-api",
+        }), 200
         
     return app
 
