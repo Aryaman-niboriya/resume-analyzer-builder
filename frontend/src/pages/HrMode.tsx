@@ -68,23 +68,21 @@ export default function HrMode() {
 
   const triggerN8nAutomation = async (candidate: any) => {
     try {
-      const n8nWebhook = import.meta.env.VITE_N8N_WEBHOOK_URL;
-      if (!n8nWebhook) {
-        toast({ 
-          title: "n8n Triggered", 
-          description: `Simulated: Sent interview invite draft task to n8n AI Agent for ${candidate.name}. Configure .env to fire real requests.`,
-        });
-        return;
-      }
-      
-      await fetch(n8nWebhook, {
+      const token = localStorage.getItem("auth_token");
+      const res = await apiFetch("/api/hr_mode/trigger_invite", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "draft_interview_invite", candidateName: candidate.name, candidateEmail: candidate.email, score: candidate.score, matchReason: candidate.verdict })
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ candidate }),
       });
-      toast({ title: "Success", description: "n8n Workflow triggered successfully!" });
-    } catch {
-      toast({ title: "Error", description: "Failed to reach n8n webhook.", variant: "destructive" });
+
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data?.error || "Failed to trigger n8n workflow.");
+      toast({ title: "Success", description: "n8n workflow triggered successfully!" });
+    } catch (e: any) {
+      toast({ title: "Error", description: e?.message || "Failed to trigger n8n workflow.", variant: "destructive" });
     }
   };
 

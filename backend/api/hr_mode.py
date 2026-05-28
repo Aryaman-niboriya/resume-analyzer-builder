@@ -6,6 +6,7 @@ from google import genai
 from google.genai import types
 import fitz  # PyMuPDF
 from api.auth import token_required
+import requests
 
 # Initialize Blueprint
 hr_mode_bp = Blueprint('hr_mode', __name__)
@@ -199,3 +200,46 @@ def analyze_batch(current_user):
             "commonMissingSkills": top_missing_skills
         }
     }), 200
+
+
+@hr_mode_bp.route('/trigger_invite', methods=['POST'])
+@token_required
+def trigger_invite(current_user):
+    """
+    Secure server-side trigger for n8n automation.
+    Frontend calls this endpoint with a candidate payload; backend posts to n8n webhook.
+    """
+    webhook_url = os.getenv("N8N_WEBHOOK_URL")
+    if not webhook_url:
+        return jsonify({"error": "N8N webhook is not configured on the server."}), 500
+
+    data = request.get_json(silent=True) or {}
+    candidate = data.get("candidate") or {}
+
+    payload = {
+        "action": "draft_interview_invite",
+        "requestedBy": {
+            "userId": str(current_user.get("_id")) if current_user else None,
+            "email": current_user.get("email") if current_user else None,
+        },
+        "candidateName": candidate.get("name"),
+        "candidateEmail": candidate.get("email"),
+        "score": candidate.get("score"),
+        "matchReason": candidate.get("verdict"),
+        "filename": candidate.get("filename"),
+        "missingSkills": candidate.get("missingSkills", []),
+        "metrics": candidate.get("metrics", {}),
+    }
+
+    try:
+        res = requests.post(webhook_url, json=payload, timeout=15)
+        if res.status_code >= 400:
+            return jsonify({
+                "error": "n8n webhook returned an error",
+                "status": res.status_code,
+                "body": res.text[:1000],
+            }), 502
+
+        return jsonify({"message": "n8n workflow triggered"}), 200
+    except requests.RequestException as e:
+        return jsonify({"error": "Failed to reach n8n webhook", "details": str(e)}), 502
