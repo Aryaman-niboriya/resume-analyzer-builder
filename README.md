@@ -1,114 +1,235 @@
-# ResumeAI — Full-Stack Resume Analyzer
+# ResumeAI — Enterprise-Grade AI Resume Analyzer & Builder
 
-AI-powered resume analysis, skill gap insights, interview prep, resume builder, and HR batch screening.
+An advanced, full-stack AI-driven application designed to streamline the recruitment process and optimize resumes for Applicant Tracking Systems (ATS). ResumeAI leverages state-of-the-art Generative AI models to analyze candidate profiles, assess skill gaps, generate tailored applications using the STAR method, conduct interactive mock interviews, and facilitate batch recruiter screening with automated n8n pipeline invitations.
 
-## Stack
+### 🌐 Live Deployment Links
+*   **Web Application (Frontend):** [https://resume-analyzer-builder.vercel.app](https://resume-analyzer-builder.vercel.app)
+*   **Production API (Backend):** [https://resume-ai-api.onrender.com](https://resume-ai-api.onrender.com) (Health status: `/health`)
 
-- **Frontend:** React, Vite, Tailwind, shadcn/ui
-- **Backend:** Flask (Python)
-- **Database:** MongoDB
+---
 
-## Local development
+## 🏗️ System Architecture & Workflow
 
-### Prerequisites
+ResumeAI is architected as a pnpm-managed monorepo combining a responsive, visualization-rich React frontend with a high-performance Flask backend coupled to MongoDB.
 
-- Node.js 20+ and [pnpm](https://pnpm.io/)
-- Python 3.12+
-- MongoDB (local or [MongoDB Atlas](https://www.mongodb.com/cloud/atlas))
+```mermaid
+graph TD
+    User([Candidate / Recruiter]) -->|Upload PDF/DOCX| FE[Vite + React Frontend]
+    FE -->|API Requests| BE[Flask Backend]
+    BE -->|Query/Persist Data| DB[(MongoDB)]
+    BE -->|Structured Schema Prompts| LLM[Google Gemini 2.5-Flash]
+    BE -->|Trigger Invite| Webhook[n8n Automation Webhook]
+    Webhook -->|Email/Calendar invite| Candidate([Candidate Email])
+```
 
-### Backend
+---
 
+## 🚀 Key Features & Capabilities
+
+### 1. ATS Analyzer & Skill Gap Insights
+*   **Text Extraction Engine:** Uses `PyMuPDF` (`fitz`) and `python-docx` to extract raw text content cleanly from PDF and Word documents.
+*   **Gemini 2.5-Flash Integration:** Leverages custom JSON schemas and analytical prompts (`temperature=0.2`) to output a strict analysis report covering keyword coverage, ATS compatibility checks, experience relevance, and core recommendations.
+*   **Visual Skill Gap Analytics:** Translates missing qualifications into custom interactive UI elements and recommends actionable, personalized learning paths.
+
+### 2. Tailored Resume Builder & Cover Letter Generator
+*   **STAR Rewrite System:** Rewrite resume bullet points dynamically according to the STAR (Situation, Task, Action, Result) method using Gemini.
+*   **Master Profile Syncing:** Manage a single "Master Profile" JSON document containing your career history, and extract/generate optimized copies customized for specific job descriptions.
+*   **Cover Letter Creator:** Generates high-converting, targeted cover letters using parsed credentials and key target job keywords.
+*   **PDF Export Engine:** Uses `jspdf` and `html-to-image` on the frontend for high-fidelity client-side PDF generation.
+
+### 3. Interactive Mock Interview Prep
+*   **Tailored Question Banks:** Generates contextual Technical, Behavioral, and Multiple Choice (MCQ) questions matching the user's resume history.
+*   **Interactive Sessions:** Practice mock interviews with inline hints, correct answer highlights (for MCQs), and performance breakdowns.
+*   **Session History:** Keeps historical records of past mock interviews in MongoDB, searchable from the dashboard.
+
+### 4. Recruiter Mode (HR Batch Screening Leaderboard)
+*   **Batch Processing Pipeline:** Upload multiple resume PDFs simultaneously.
+*   **API Rate Limit Optimization:** Packs multiple resumes into a single massive, structured prompt, analyzing the entire pool in one API trip to eliminate rate limiting.
+*   **Radar Metrics & Scoreboards:** Visualizes candidate scores across 5 metrics (Tech Skills, Experience, Education, Communication, Culture Fit) using `recharts` radar charts.
+*   **n8n Automation Trigger:** Features a secure backend route `/api/hr_mode/trigger_invite` that formats candidate details and fires a post request to n8n webhooks to trigger downstream recruitment steps (calendar invites, draft outreach emails).
+
+---
+
+## 🛠️ Technology Stack
+
+| Layer | Technology | Details |
+|---|---|---|
+| **Frontend Core** | React 18, TypeScript 5.9 | Type-safe user interfaces, client-side routing using `wouter` |
+| **Styling & UI** | Tailwind CSS, shadcn/ui | Beautiful visual design system, glassmorphic headers, responsive layouts |
+| **Visualizations**| Recharts | Interactive radar charts and keyword density gauges |
+| **Backend API** | Flask 3.0.3, Python 3.12 | Lightweight API orchestration, modular routing with blueprints |
+| **Database** | MongoDB (PyMongo) | Flexible document storage for profiles, reports, and interviews |
+| **AI Processing**| Google GenAI SDK | Structured JSON schemas targeting `gemini-2.5-flash` |
+| **Automation** | n8n Webhook Triggers | Real-time automated candidate outreach orchestration |
+
+---
+
+## 📂 Project Directory Structure
+
+```text
+├── backend/                  # Flask REST API
+│   ├── api/                  # Blueprint modular routes
+│   │   ├── ai.py             # Gemini client & core resume analysis prompt
+│   │   ├── auth.py           # JWT auth & Google Sign-In handlers
+│   │   ├── builder.py        # Master profile parser & STAR resume tailor
+│   │   ├── dashboard.py      # History and analytics fetch
+│   │   ├── hr_mode.py        # Batch analyzer pipeline & n8n webhook runner
+│   │   ├── interview.py      # MCQ / Q&A generator & interactive session log
+│   │   ├── parser.py         # PDF and DOCX parsing helper logic
+│   │   └── upload.py         # Temp files handler & analysis save
+│   ├── app.py                # Flask main entrypoint
+│   ├── db.py                 # PyMongo client & thread-safe proxy handler
+│   ├── requirements.txt      # Python dependencies
+│   └── wsgi.py               # Production WSGI gateway interface
+│
+├── frontend/                 # React Single Page App
+│   ├── src/
+│   │   ├── pages/            # View Pages (Upload, HrMode, Dashboard, Builder)
+│   │   ├── components/       # Reusable components (radar charts, nav, layout)
+│   │   ├── hooks/            # Shared React custom hooks
+│   │   ├── App.tsx           # Client Router & Global Providers
+│   │   └── index.css         # Styling system & Tailwind declarations
+│   ├── package.json          # Frontend dependencies & dev scripts
+│   └── vite.config.ts        # Vite configuration
+│
+├── scripts/                  # Automated setup and deployment scripts
+│   ├── deploy-all.sh         # Top-level deployment script orchestrator
+│   ├── deploy-vercel.sh      # Automated Vercel CLI deployment script
+│   └── render-env-checklist.md  # Production Environment checklist config
+│
+├── pnpm-workspace.yaml       # Monorepo workspaces definition
+├── render.yaml               # Render Infrastructure-as-Code blueprint
+└── vercel.json               # Vercel routing rules & builds configuration
+```
+
+---
+
+## ⚙️ Local Development Setup
+
+### 📋 Prerequisites
+*   **Node.js:** v20+ with [pnpm](https://pnpm.io/) configured
+*   **Python:** v3.12+
+*   **Database:** Local MongoDB instance running at `mongodb://localhost:27017` or a cloud-hosted MongoDB Atlas URI.
+
+---
+
+### 1. Database Configuration
+If using local MongoDB, start the service:
 ```bash
-cd backend
-python3 -m venv venv
-source venv/bin/activate   # Windows: venv\Scripts\activate
-pip install -r requirements.txt
-cp .env.example .env       # then edit .env
-python app.py
+# macOS (Homebrew)
+brew services start mongodb-community
 ```
 
-API runs at `http://localhost:5001` (health: `/health`).
+---
 
-### Frontend
+### 2. Backend Installation & Start
+1. Navigate to the `backend/` directory:
+   ```bash
+   cd backend
+   ```
+2. Create and activate a Python virtual environment:
+   ```bash
+   python3 -m venv venv
+   source venv/bin/activate
+   # Windows: venv\Scripts\activate
+   ```
+3. Install the application dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
+4. Configure environment files:
+   ```bash
+   cp .env.example .env
+   ```
+   Modify `backend/.env` with your actual API keys:
+   ```env
+   PORT=5001
+   MONGO_URI=mongodb://localhost:27017/saas_display
+   JWT_SECRET=generate-a-secure-32-character-key
+   GEMINI_API_KEY=AIzaSyYourGeminiAPIKeyHere
+   GOOGLE_CLIENT_ID=your-google-oauth-client-id.apps.googleusercontent.com
+   FRONTEND_URL=http://localhost:5173
+   N8N_WEBHOOK_URL=https://your-n8n-instance.com/webhook/invite
+   ```
+5. Start the backend dev server:
+   ```bash
+   python app.py
+   ```
+   *The server will boot on [http://localhost:5001](http://localhost:5001). Test the health route at `http://localhost:5001/health`.*
 
-```bash
-cp frontend/.env.example frontend/.env   # edit if needed
-pnpm install
-pnpm run dev:frontend
-```
+---
 
-App runs at `http://localhost:5173`.
+### 3. Frontend Installation & Start
+1. Return to the project root directory:
+   ```bash
+   cd ..
+   ```
+2. Configure frontend environment settings:
+   ```bash
+   cp frontend/.env.example frontend/.env
+   ```
+   Edit `frontend/.env`:
+   ```env
+   VITE_API_URL=http://localhost:5001
+   VITE_GOOGLE_CLIENT_ID=your-google-oauth-client-id.apps.googleusercontent.com
+   ```
+3. Install workspace dependencies and run frontend:
+   ```bash
+   pnpm install
+   pnpm run dev:frontend
+   ```
+   *The application will boot at [http://localhost:5173](http://localhost:5173).*
 
-## Environment variables
+---
 
-| Variable | Where | Description |
-|----------|--------|-------------|
-| `MONGO_URI` | Backend | MongoDB connection string |
-| `JWT_SECRET` | Backend | Secret for auth tokens |
-| `GEMINI_API_KEY` | Backend | Google Gemini API key |
-| `GOOGLE_CLIENT_ID` | Backend + Frontend | OAuth client ID |
-| `FRONTEND_URL` | Backend | Deployed frontend URL (CORS) |
-| `VITE_API_URL` | Frontend | Deployed backend URL |
-| `VITE_GOOGLE_CLIENT_ID` | Frontend | Same as `GOOGLE_CLIENT_ID` |
+## 🌐 Production Deployment
 
-## Push to GitHub
+### Automated Script Deployments
+The repository includes automated scripts inside the `scripts/` directory to coordinate builds:
+1. Create a `scripts/.env.deploy.local` file using [scripts/env.deploy.example](file:///Users/aryamanniboriya/Desktop/SaaS-Display/scripts/env.deploy.example) as a baseline.
+2. Fill out all the API URLs and secrets inside it.
+3. Run the deployment sequence:
+   ```bash
+   bash scripts/deploy-all.sh
+   ```
 
-```bash
-git add .
-git commit -m "Add ResumeAI app with deploy config"
-git branch -M main
-git remote add origin https://github.com/YOUR_USERNAME/YOUR_REPO.git
-git push -u origin main
-```
+---
 
-Replace `YOUR_USERNAME` and `YOUR_REPO` with your GitHub details.
+### Manual Deployments
 
-## Deploy
+#### 1. Backend Web Service (Render)
+This project includes a [render.yaml](file:///Users/aryamanniboriya/Desktop/SaaS-Display/render.yaml) configuration file, allowing for easy blueprint deployments on Render.
+*   **Build Command:** `pip install -r requirements.txt`
+*   **Start Command:** `gunicorn wsgi:app --bind 0.0.0.0:$PORT --workers 2 --timeout 120`
+*   **Environment Variables:** Add keys for `MONGO_URI`, `JWT_SECRET`, `GEMINI_API_KEY`, `GOOGLE_CLIENT_ID`, and `FRONTEND_URL`.
 
-### 1. MongoDB Atlas
+#### 2. Frontend Web Application (Vercel)
+*   Deploy using the project root directory. Vercel automatically reads the configuration parameters specified in [vercel.json](file:///Users/aryamanniboriya/Desktop/SaaS-Display/vercel.json) to build the React application out of the `frontend` subfolder.
+*   **Environment Variables:** Set `VITE_API_URL` to your live Render endpoint, and `VITE_GOOGLE_CLIENT_ID` to your Google Developer credentials.
 
-1. Create a free cluster at [mongodb.com/cloud/atlas](https://www.mongodb.com/cloud/atlas).
-2. Create a database user and allow network access (`0.0.0.0/0` for cloud hosts).
-3. Copy the connection string → use as `MONGO_URI`.
+---
 
-### 2. Backend — [Render](https://render.com)
+## 🔗 n8n Integration Pipeline Setup
 
-1. New **Web Service** → connect your GitHub repo.
-2. Use **Blueprint** (`render.yaml`) or set manually:
-   - **Root directory:** `backend`
-   - **Build:** `pip install -r requirements.txt`
-   - **Start:** `gunicorn wsgi:app --bind 0.0.0.0:$PORT --workers 2 --timeout 120`
-3. Add environment variables from `backend/.env.example`.
-4. Set `FRONTEND_URL` after you deploy the frontend (e.g. `https://your-app.vercel.app`).
-5. Copy the service URL (e.g. `https://resume-ai-api.onrender.com`).
+In **HR Recruiter Mode**, users can trigger auto-invite outreach emails. When clicking the "Auto Invite" button:
+1. The backend formats a structured payload representing the candidate's metrics, score, resume name, and email.
+2. It executes a secure POST request to the `N8N_WEBHOOK_URL` containing:
+   ```json
+   {
+     "action": "draft_interview_invite",
+     "requestedBy": { "userId": "...", "email": "..." },
+     "candidateName": "Aryaman Niboriya",
+     "candidateEmail": "candidate@example.com",
+     "score": 92,
+     "matchReason": "Strong engineering match...",
+     "filename": "Aryaman_Resume.pdf",
+     "missingSkills": ["Docker"],
+     "metrics": { "Tech Skills": 9, "Experience": 8 }
+   }
+   ```
+3. Set up an n8n webhook node pointing to your trigger URL to parse this JSON payload, compose a professional invitation email, draft it to Gmail or Outlook, and notify the hiring team on Slack/Teams.
 
-### 3. Frontend — [Vercel](https://vercel.com)
+---
 
-1. Import the GitHub repo.
-2. Framework preset: **Other** (or use `vercel.json` at repo root).
-3. Environment variables:
-   - `VITE_API_URL` = your Render backend URL
-   - `VITE_GOOGLE_CLIENT_ID` = your Google OAuth client ID
-4. Deploy.
-
-### 4. Google OAuth
-
-In [Google Cloud Console](https://console.cloud.google.com/apis/credentials):
-
-- **Authorized JavaScript origins:** `http://localhost:5173`, your Vercel URL
-- **Authorized redirect URIs:** same origins (OAuth popup flow)
-
-Update `GOOGLE_CLIENT_ID` on Render and `VITE_GOOGLE_CLIENT_ID` on Vercel.
-
-## Project structure
-
-```
-backend/          Flask API
-frontend/         React app
-render.yaml       Render deploy blueprint
-vercel.json       Vercel deploy config
-```
-
-## License
-
-MIT
+## 📝 License
+This project is licensed under the MIT License - see the `LICENSE` file for details.
